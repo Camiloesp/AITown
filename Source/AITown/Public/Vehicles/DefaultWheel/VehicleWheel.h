@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "WheeledVehiclePawn.h"
-#include "MyWheeledVehiclePawn.generated.h"
+#include "ChaosVehicleWheel.h"
+#include "VehicleWheel.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class AITOWN_API AMyWheeledVehiclePawn : public AWheeledVehiclePawn
+class AITOWN_API UVehicleWheel : public UChaosVehicleWheel
 {
 	GENERATED_BODY()
 	

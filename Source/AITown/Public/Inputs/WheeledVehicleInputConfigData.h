@@ -5,23 +5,29 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "EnhancedInput/Public/InputAction.h"
-#include "CharacterInputConfigData.generated.h"
+#include "WheeledVehicleInputConfigData.generated.h"
 
 /**
- * Store pointer to Input Action for native binding
-*/
+ * 
+ */
 UCLASS()
-class AITOWN_API UCharacterInputConfigData : public UDataAsset
+class AITOWN_API UWheeledVehicleInputConfigData : public UDataAsset
 {
 	GENERATED_BODY()
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UInputAction* InputMove;
+	UInputAction* InputThrottle;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UInputAction* InputLook;
+	UInputAction* InputSteering;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UInputAction* InputSpace;
+	UInputAction* InputLookAround;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* InputBreak;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* InputHandBreak;
 };
