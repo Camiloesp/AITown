@@ -9,6 +9,12 @@
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
+#include "Interfaces/InteractInferface.h"
+#include "Weapons/Weapon.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter()
@@ -22,6 +28,9 @@ AShooterCharacter::AShooterCharacter()
 
 	Camera = CreateDefaultSubobject<UCameraComponent>( TEXT("Camera"));
 	Camera->SetupAttachment( SpringArm );
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel( ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Overlap );
+	GetMesh()->SetCollisionResponseToChannel( ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Overlap );
 }
 
 // Called when the game starts or when spawned
@@ -29,12 +38,19 @@ void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (APlayerController* PlayerController = Cast<APlayerController>( Controller ))
+	PlayerController = Cast<APlayerController>( Controller );
+	if (PlayerController)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>( PlayerController->GetLocalPlayer() ))
 		{
 			Subsystem->AddMappingContext( InputMapping, 0 );
 		}
+	}
+
+	// Damage binding
+	if (HasAuthority())
+	{
+		OnTakeAnyDamage.AddDynamic( this, &AShooterCharacter::ReceiveDamage );
 	}
 }
 
@@ -42,7 +58,6 @@ void AShooterCharacter::BeginPlay()
 void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -52,9 +67,16 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>( PlayerInputComponent ))
 	{
+		/* Basic movement */
 		EnhancedInputComponent->BindAction( InputActions->InputMove, ETriggerEvent::Triggered, this, &AShooterCharacter::Move );
 		EnhancedInputComponent->BindAction( InputActions->InputLook, ETriggerEvent::Triggered, this, &AShooterCharacter::Look );
 		EnhancedInputComponent->BindAction( InputActions->InputSpace, ETriggerEvent::Triggered, this, &ThisClass::Jump );
+
+		/* Interact action */
+		EnhancedInputComponent->BindAction( InputActions->InputAction, ETriggerEvent::Triggered, this, &AShooterCharacter::Action );
+		
+		/* Combat actions */
+		EnhancedInputComponent->BindAction( InputActions->InputFire, ETriggerEvent::Triggered, this, &AShooterCharacter::FireButtonPressed );
 	}
 }
 
@@ -101,5 +123,75 @@ void AShooterCharacter::Look( const FInputActionValue& Value )
 			AddControllerPitchInput( LookValue.Y );
 		}
 	}
+}
+
+void AShooterCharacter::Action( const FInputActionValue& Value )
+{
+	// If there is a current interactable object, call its Interact function
+	if (CurrentInteractableObject.IsValid())
+	{
+		IInteractInferface* Interactable = Cast<IInteractInferface>( CurrentInteractableObject.Get() );
+		if (Interactable)
+		{
+			Interactable->Interact( this );
+		}
+	}
+}
+
+void AShooterCharacter::FireButtonPressed( const FInputActionValue& Value )
+{
+	bFireButtonPressed = Value.Get<bool>();
+
+	if (EquippedWeapon && bFireButtonPressed)
+	{
+		EquippedWeapon->FireWeapon();
+	}
+}
+
+void AShooterCharacter::ReceiveDamage( AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser )
+{
+	UpdateHealth( Health, -Damage, MaxHealth );
+}
+
+void AShooterCharacter::HealthDepleted()
+{
+	// TODO: Death sound? UGHHHHHH ?
+	// TODO: After a few seconds dematerialize and destroy
+
+	if (bUseRagdollDeath)
+	{
+		GetMesh()->SetCollisionProfileName( FName( "Ragdoll" ) );
+		GetMesh()->SetSimulatePhysics( true );
+		GetCharacterMovement()->DisableMovement();
+
+		SpringArm->bDoCollisionTest = false;
+
+		return;
+	}
+	else
+	{
+		if (DeathMontage)
+		{
+			int RandomIndex = FMath::RandRange( 0, DeathMontageSectionNames.Num() - 1 );
+			PlayAnimMontage( DeathMontage, 1.f, DeathMontageSectionNames[RandomIndex] );
+		}
+	}
+
+	// TODO" Remove capsule's collision
+	/*GetCapsuleComponent()->SetCollisionResponseToChannel( ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore );
+	GetCapsuleComponent()->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels( ECollisionResponse::ECR_Ignore );*/
+}
+
+void AShooterCharacter::SetCurrentInteractableObject( UObject* InteractableObject )
+{
+	// Set the current interactable object
+	CurrentInteractableObject = InteractableObject;
+}
+
+void AShooterCharacter::ClearCurrentInteractableObject()
+{
+	// Clear the current interactable object
+	CurrentInteractableObject.Reset();
 }
 

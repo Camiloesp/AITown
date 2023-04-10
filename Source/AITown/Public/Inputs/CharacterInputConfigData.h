@@ -24,4 +24,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UInputAction* InputSpace;
+
+	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
+	UInputAction* InputAction;
+
+	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
+	UInputAction* InputFire;
 };
