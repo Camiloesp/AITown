@@ -80,3 +80,8 @@ private:
 	bool GetBeamEndLocation( const FVector& MuzzleSocketLocation, FHitResult& OutHitResult );
 	bool TraceUnderCrosshairs( FHitResult& OutHitResult, FVector& OutHitLocation );
 };
+
+/*
+* TODO:
+* - After Dropping weapon, set timer to destroy it if it hasn't been picked up. 1 min?
+*/

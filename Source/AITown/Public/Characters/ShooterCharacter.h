@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Inputs/CharacterInputConfigData.h"
 #include "Interfaces/HealthInterface.h"
+#include "AITownTypes.h"
 #include "ShooterCharacter.generated.h"
 
 class UInputMappingContext;
@@ -34,7 +35,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-
 	/* AShooterCharacter */
 public:
 
@@ -46,11 +46,16 @@ public:
 	// Clear the current interactable object
 	void ClearCurrentInteractableObject();
 
+	/* Gives this character a weapon. Drops the current equipped weapon and gets a new one. */
+	UFUNCTION( BlueprintCallable )
+	virtual void GiveWeapon( AWeapon* WeaponToEquipp );
+
 protected:
 
 	/* Input functions */
 	void Move( const FInputActionValue& Value );
 	void Look( const FInputActionValue& Value );
+	void JumpButtonPressed( const FInputActionValue& Value );
 	void Action( const FInputActionValue& Value );
 	void FireButtonPressed( const FInputActionValue& Value );
 
@@ -78,6 +83,9 @@ private:
 	UPROPERTY()
 	APlayerController* PlayerController;
 
+	/* Movemement */
+	bool bJumpButtonPressed = false;
+
 	/* Interaction references */
 	UPROPERTY()
 	TWeakObjectPtr<UObject> CurrentInteractableObject;
@@ -104,9 +112,15 @@ private:
 	UPROPERTY( EditAnywhere, Category = "03 - Combat" )
 	TArray<FName> DeathMontageSectionNames;
 
+	/* Player stats */
+	UPROPERTY( EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "04 - Player Stats" )
+	EOccupationType Occupation = EOccupationType::EOT_Unemployed;
+
 public:
 
 	FORCEINLINE void SetEquippedWeapon( AWeapon* NewWeapon ) { EquippedWeapon = NewWeapon; }
 
 	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
+	FORCEINLINE bool IsTryingToJump() const { return bJumpButtonPressed; }
+	FORCEINLINE UObject* GetCurrentInteractableObject() const { return CurrentInteractableObject.Get(); }
 };

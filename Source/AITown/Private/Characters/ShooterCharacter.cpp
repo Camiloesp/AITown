@@ -30,6 +30,8 @@ AShooterCharacter::AShooterCharacter()
 	Camera->SetupAttachment( SpringArm );
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel( ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Overlap );
+	GetCapsuleComponent()->SetCollisionResponseToChannel( ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap );
+
 	GetMesh()->SetCollisionResponseToChannel( ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Overlap );
 }
 
@@ -70,7 +72,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		/* Basic movement */
 		EnhancedInputComponent->BindAction( InputActions->InputMove, ETriggerEvent::Triggered, this, &AShooterCharacter::Move );
 		EnhancedInputComponent->BindAction( InputActions->InputLook, ETriggerEvent::Triggered, this, &AShooterCharacter::Look );
-		EnhancedInputComponent->BindAction( InputActions->InputSpace, ETriggerEvent::Triggered, this, &ThisClass::Jump );
+		EnhancedInputComponent->BindAction( InputActions->InputSpace, ETriggerEvent::Triggered, this, &AShooterCharacter::JumpButtonPressed );
 
 		/* Interact action */
 		EnhancedInputComponent->BindAction( InputActions->InputAction, ETriggerEvent::Triggered, this, &AShooterCharacter::Action );
@@ -122,6 +124,15 @@ void AShooterCharacter::Look( const FInputActionValue& Value )
 		{
 			AddControllerPitchInput( LookValue.Y );
 		}
+	}
+}
+
+void AShooterCharacter::JumpButtonPressed( const FInputActionValue& Value )
+{
+	bJumpButtonPressed = Value.Get<bool>();
+	if (bJumpButtonPressed)
+	{
+		Jump();
 	}
 }
 
@@ -177,10 +188,19 @@ void AShooterCharacter::HealthDepleted()
 		}
 	}
 
-	// TODO" Remove capsule's collision
+	// TODO: Remove capsule's collision
 	/*GetCapsuleComponent()->SetCollisionResponseToChannel( ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore );
 	GetCapsuleComponent()->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels( ECollisionResponse::ECR_Ignore );*/
+}
+
+void AShooterCharacter::GiveWeapon( AWeapon* WeaponToEquipp )
+{
+	IInteractInferface* Interactable = Cast<IInteractInferface>( WeaponToEquipp );
+	if (Interactable)
+	{
+		Interactable->Interact( this );
+	}
 }
 
 void AShooterCharacter::SetCurrentInteractableObject( UObject* InteractableObject )

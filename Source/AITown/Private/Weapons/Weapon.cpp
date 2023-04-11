@@ -201,7 +201,9 @@ bool AWeapon::GetBeamEndLocation( const FVector& MuzzleSocketLocation, FHitResul
 	const FVector WeaponTraceStart{ MuzzleSocketLocation };
 	const FVector StartToEnd{ OutBeamLocation - MuzzleSocketLocation };
 	const FVector WeaponTraceEnd{ MuzzleSocketLocation + StartToEnd * 1.25f };
-	GetWorld()->LineTraceSingleByChannel( OutHitResult, WeaponTraceStart, WeaponTraceEnd, ECollisionChannel::ECC_Visibility );
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor( GetOwner() );
+	GetWorld()->LineTraceSingleByChannel( OutHitResult, WeaponTraceStart, WeaponTraceEnd, ECollisionChannel::ECC_Visibility, QueryParams );
 
 
 	if (!OutHitResult.bBlockingHit) //object between barrel and BeamEndPoint?
@@ -236,7 +238,9 @@ bool AWeapon::TraceUnderCrosshairs( FHitResult& OutHitResult, FVector& OutHitLoc
 		const FVector Start{ CrosshairWorldPosition };
 		const FVector End{ Start + CrosshairWorldDirection * 50'000.f };
 		OutHitLocation = End;
-		GetWorld()->LineTraceSingleByChannel( OutHitResult, Start, End, ECollisionChannel::ECC_Visibility );
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor( GetOwner() );
+		GetWorld()->LineTraceSingleByChannel( OutHitResult, Start, End, ECollisionChannel::ECC_Visibility, QueryParams );
 
 		if (OutHitResult.bBlockingHit)
 		{
