@@ -8,7 +8,7 @@
 
 class UAIPerceptionComponent;
 struct FAIStimulus;
-
+class AAICharacter;
 /**
  * 
  */
@@ -31,6 +31,8 @@ public:
 protected:
 private:
 
+	UPROPERTY()
+	AAICharacter* ControlledPawn;
 	//AAIController::PerceptionComponent already exists.
 	UPROPERTY()
 	AActor* CombatTarget;
@@ -44,6 +46,14 @@ private:
 
 
 /*
+	Teams:
+	- 0 = neutral
+	- 1 = Player
+	- 2 = AIs
+	OR
+	- We all on the same team. If player does something bad, change team.
+ 
+
 	What I want the AI to do:
 	- Citizens with jobs. Cashiers/FrontDesk, Drivers, Cops, Delinquents. If no job just have them walk around point of interests.
 	- Citizens get scared if violence nearby. Can they see player carrying weapons? They constantly run away from danger. Timer to go back to normal.
@@ -75,7 +85,7 @@ private:
 
 
 
-	Interest Point:
+	Point of Interest (POI):
 	- Occupation Enum.
 	- Reference characters for this point. array?
 		- Interest point has reference to all actors with the same occupation.

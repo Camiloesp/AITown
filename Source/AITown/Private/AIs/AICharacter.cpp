@@ -11,3 +11,15 @@ void AAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
 }
+
+void AAICharacter::SetCurrentInteractableObject( UObject* InteractableObject )
+{
+	if (AShooterCharacter* Player = Cast<AShooterCharacter>( InteractableObject ))
+	{
+
+	}
+	else
+	{
+		Super::SetCurrentInteractableObject( InteractableObject ); // Sets interactable object focus and ready for pickup.
+	}
+}

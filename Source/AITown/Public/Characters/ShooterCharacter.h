@@ -7,6 +7,7 @@
 #include "Inputs/CharacterInputConfigData.h"
 #include "Interfaces/HealthInterface.h"
 #include "AITownTypes.h"
+#include "GenericTeamAgentInterface.h"
 #include "ShooterCharacter.generated.h"
 
 class UInputMappingContext;
@@ -16,7 +17,7 @@ class AWeapon;
 class APlayerController;
 
 UCLASS()
-class AITOWN_API AShooterCharacter : public ACharacter, public IHealthInterface
+class AITOWN_API AShooterCharacter : public ACharacter, public IHealthInterface, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -41,7 +42,7 @@ public:
 	bool bFireButtonPressed = false;
 
 	// Set the current interactable object
-	void SetCurrentInteractableObject( UObject* InteractableObject );
+	virtual void SetCurrentInteractableObject( UObject* InteractableObject );
 
 	// Clear the current interactable object
 	void ClearCurrentInteractableObject();
@@ -73,6 +74,8 @@ private:
 	USpringArmComponent* SpringArm;
 	UPROPERTY( EditDefaultsOnly )
 	UCameraComponent* Camera;
+	UPROPERTY( EditDefaultsOnly )
+	class UAIPerceptionStimuliSourceComponent* AIPerceptionStimuliSource;
 
 	/* Inputs */
 	UPROPERTY( EditDefaultsOnly, Category = "00 - Enhanced Input" )
@@ -116,7 +119,15 @@ private:
 	UPROPERTY( EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "04 - Player Stats" )
 	EOccupationType Occupation = EOccupationType::EOT_Unemployed;
 
+	//----------------------------------------------------------------------//
+	// IGenericTeamAgentInterface
+	//----------------------------------------------------------------------//
+	FGenericTeamId TeamID;
+	
 public:
+
+	virtual void SetGenericTeamId( const FGenericTeamId& NewTeamID ) override { if (TeamID != NewTeamID) TeamID = NewTeamID; };
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamID; }
 
 	FORCEINLINE void SetEquippedWeapon( AWeapon* NewWeapon ) { EquippedWeapon = NewWeapon; }
 

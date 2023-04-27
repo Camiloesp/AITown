@@ -13,6 +13,8 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+
 #include "Interfaces/InteractInferface.h"
 #include "Weapons/Weapon.h"
 
@@ -33,6 +35,12 @@ AShooterCharacter::AShooterCharacter()
 	GetCapsuleComponent()->SetCollisionResponseToChannel( ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap );
 
 	GetMesh()->SetCollisionResponseToChannel( ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Overlap );
+
+
+	AIPerceptionStimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>( TEXT("AIPerceptionStimuliSource"));
+
+	//IGenericTeamAgentInterface
+	SetGenericTeamId( FGenericTeamId( 1 ) );
 }
 
 // Called when the game starts or when spawned

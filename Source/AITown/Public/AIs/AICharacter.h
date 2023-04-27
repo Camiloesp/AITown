@@ -25,14 +25,12 @@ protected:
 	/* AAICharacter */
 public:
 
-
+	virtual void SetCurrentInteractableObject( UObject* InteractableObject );
 
 protected:
 
 
 
 private:
-
-	
 
 };
